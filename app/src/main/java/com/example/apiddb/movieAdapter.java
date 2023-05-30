@@ -108,7 +108,7 @@ public class movieAdapter extends RecyclerView.Adapter<movieAdapter.MyViewHolder
     public void onBindViewHolder(@NonNull movieAdapter.MyViewHolder holder, int position) {
         final movieModel code = this.codeList.get(position);
         holder.tvname.setText(code.getFilmName());
-        holder.tvtahun.setText(code.getDate());
+        holder.tvtahun.setText("Tahun " + code.getDate());
         Glide.with(holder.itemView.getContext()).load("https://image.tmdb.org/t/p/w500" + code.getLogoFilm()).into(holder.imageview);
     }
 

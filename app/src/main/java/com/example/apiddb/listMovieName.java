@@ -5,8 +5,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import com.androidnetworking.AndroidNetworking;
 import com.androidnetworking.common.Priority;
@@ -19,15 +24,24 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class listMovieName extends AppCompatActivity implements movieAdapter.MovieAdapterlistener{
+public class listMovieName extends AppCompatActivity implements movieAdapter.MovieAdapterlistener {
     RecyclerView recycled;
     ArrayList<movieModel> listDataMovie;
     private movieAdapter adapterListCode;
+    ProgressBar progressBar;
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_list_movie_name);
+        listDataMovie = new ArrayList<>();
+        progressBar = findViewById(R.id.progressBar);
+        GetMovie();
+    }
 
-    public void GetMovie(){
+    public void GetMovie() {
         String url = "https://api.themoviedb.org/3/movie/popular?api_key=5e30e788ba0016174d8c885253084699";
-
+progressBar.setVisibility(View.VISIBLE);
         AndroidNetworking.get(url)
                 .setPriority(Priority.MEDIUM)
                 .build()
@@ -56,11 +70,12 @@ public class listMovieName extends AppCompatActivity implements movieAdapter.Mov
                             }
                             recycled = findViewById(R.id.recycled);
 
-                            adapterListCode = new movieAdapter(getApplicationContext(), listDataMovie,listMovieName.this);
+                            adapterListCode = new movieAdapter(getApplicationContext(), listDataMovie, listMovieName.this);
                             RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
                             recycled.setHasFixedSize(true);
                             recycled.setLayoutManager(mLayoutManager);
                             recycled.setAdapter(adapterListCode);
+                            progressBar.setVisibility(View.GONE);
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -70,24 +85,41 @@ public class listMovieName extends AppCompatActivity implements movieAdapter.Mov
                     @Override
                     public void onError(ANError error) {
                         // Tangani kesalahan
-                        Log.d("failed ", "onError: "+error.toString());
+                        Log.d("failed ", "onError: " + error.toString());
                     }
                 });
 
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list_movie_name);
-        listDataMovie = new ArrayList<>();
-        GetMovie();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.popup_signout, menu);
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.menu_sign_out) {
+            // Tambahkan kode untuk melakukan sign out di sini
+            SharedPreferences preferences = getSharedPreferences("NamaSesi", MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.clear();
+            editor.apply();
+
+            Intent intent = new Intent(this, loginPage.class);
+            startActivity(intent);
+            finish();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onContactSelected(movieModel contact) {
-        Intent intent = new Intent(listMovieName.this,detailPage.class);
+        Intent intent = new Intent(listMovieName.this, detailPage.class);
         intent.putExtra("mymovie", contact);
         startActivity(intent);
     }
@@ -96,7 +128,6 @@ public class listMovieName extends AppCompatActivity implements movieAdapter.Mov
     public void onLongClickListener(movieModel film) {
 
     }
-
 
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
